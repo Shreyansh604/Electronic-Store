@@ -1,0 +1,16 @@
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.git
+.gitignore
+README.md
+.env
+.nyc_output
+coverage
+.dist
+*.md
+.DS_Store
+Thumbs.db
+.vscode
