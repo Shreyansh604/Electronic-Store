@@ -1,0 +1,53 @@
+services:
+  # Backend Server (Development)
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    env_file:
+      - ./server/.env
+    environment:
+      - NODE_ENV=development
+    container_name: ecommerce-server-dev
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    networks:
+      - ecommerce-network
+
+  # Frontend Client (Development)
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    container_name: ecommerce-client-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:5000
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - FAST_REFRESH=false
+      - WDS_SOCKET_HOST=localhost
+      - WDS_SOCKET_PORT=3000
+
+    depends_on:
+      - server
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    networks:
+      - ecommerce-network
+
+# Named volumes
+volumes:
+  mongodb_data_dev:
+
+# Custom network
+networks:
+  ecommerce-network:
+    driver: bridge

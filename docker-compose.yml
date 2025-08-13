@@ -1,0 +1,57 @@
+services:
+  # Redis (for caching and sessions)
+  redis:
+    image: redis:7.2-alpine
+    container_name: ecommerce-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ecommerce-network
+
+  # Backend Server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: ecommerce-server
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./server/.env
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - redis
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    networks:
+      - ecommerce-network
+
+  # Frontend Client
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      target: production
+    container_name: ecommerce-client
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+    networks:
+      - ecommerce-network
+
+# Named volumes
+volumes:
+  redis_data:
+
+# Custom network
+networks:
+  ecommerce-network:
+    driver: bridge
